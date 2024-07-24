@@ -30,7 +30,7 @@ public class Dispatcher {
       }
 
       processors.get(request.getUri()).execute(request, out);
-    }catch (BadRequestException e){
+    } catch (BadRequestException e) {
       e.printStackTrace();
       String response = "" +
               "HTTP/1.1 400 Bad Request\r\n" +
@@ -38,13 +38,9 @@ public class Dispatcher {
               "\r\n" +
               "<html><body><h1>" + e.getMessage() + "</h1></body></html>";
       out.write(response.getBytes(StandardCharsets.UTF_8));
-    }catch (Exception e){
+    } catch (Exception e) {
       e.printStackTrace();
       defaultInternalServerErrorRequestProcessor.execute(request, out);
     }
-
-
-
   }
-
 }

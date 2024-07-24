@@ -7,24 +7,24 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-public class CalculatorRequestProcessor implements RequestProcessor{
+public class CalculatorRequestProcessor implements RequestProcessor {
   @Override
   public void execute(HttpRequest request, OutputStream out) throws IOException {
-    if(!request.containsParameter("a")){
+    if (!request.containsParameter("a")) {
       throw new BadRequestException("Parameter 'a' is missing");
     }
-    if(!request.containsParameter("b")){
+    if (!request.containsParameter("b")) {
       throw new BadRequestException("Parameter 'b' is missing");
     }
     int a, b;
-    try{
+    try {
       a = Integer.parseInt(request.getParameter("a"));
-    }catch (NumberFormatException e){
+    } catch (NumberFormatException e) {
       throw new BadRequestException("Parameter 'a' has incorrect type");
     }
-    try{
+    try {
       b = Integer.parseInt(request.getParameter("b"));
-    }catch (NumberFormatException e){
+    } catch (NumberFormatException e) {
       throw new BadRequestException("Parameter 'b' has incorrect type");
     }
     String result = a + " + " + b + " = " + (a + b);
