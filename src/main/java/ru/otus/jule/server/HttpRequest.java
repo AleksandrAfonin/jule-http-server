@@ -49,8 +49,5 @@ public class HttpRequest {
     if (showRawRequest) {
       System.out.println(rawRequest);
     }
-
-
   }
-
 }

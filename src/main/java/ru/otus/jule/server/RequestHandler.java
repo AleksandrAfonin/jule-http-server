@@ -26,10 +26,16 @@ public class RequestHandler implements Runnable {
       }
       String rawRequest = new String(buffer, 0, n);
       HttpRequest request = new HttpRequest(rawRequest);
-      request.printInfo(true);
+      request.printInfo(false);
       dispatcher.execute(request, out);
     } catch (IOException e) {
       throw new RuntimeException(e);
+    } finally {
+      try {
+        socket.close();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 }

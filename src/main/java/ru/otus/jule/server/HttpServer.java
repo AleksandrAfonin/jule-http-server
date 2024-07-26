@@ -20,8 +20,8 @@ public class HttpServer {
          ExecutorService executorService = Executors.newFixedThreadPool(10)) {
       System.out.println("Сервер запущен на порту: " + port);
       while (true) {
-        try (Socket socket = serverSocket.accept()) {
-          // В RequestHandler приходит закрытый сокет не пойму почему
+        try {
+          Socket socket = serverSocket.accept();
           executorService.execute(new RequestHandler(socket, dispatcher));
 
         } catch (IOException e) {
