@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-public class DefaultInternalServerErrorRequestProcessor implements RequestProcessor{
+public class DefaultInternalServerErrorRequestProcessor implements RequestProcessor {
   @Override
   public void execute(HttpRequest request, OutputStream out) throws IOException {
     String response = "" +
