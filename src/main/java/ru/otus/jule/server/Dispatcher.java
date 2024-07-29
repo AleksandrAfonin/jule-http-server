@@ -43,8 +43,7 @@ public class Dispatcher {
       }
       processors.get(request.getRoutingKey()).execute(request, out);
     } catch (BadRequestException e) {
-      logger.info(e.getMessage());
-      e.printStackTrace();
+      logger.error(e);
       DefaultErrorDto defaultErrorDto = new DefaultErrorDto("CLIENT_DEFAULT_ERROR", e.getMessage());
       String jsonError = new Gson().toJson(defaultErrorDto);
       String response = "" +
@@ -54,8 +53,7 @@ public class Dispatcher {
               jsonError;
       out.write(response.getBytes(StandardCharsets.UTF_8));
     } catch (Exception e) {
-      logger.error(e.getMessage());
-      e.printStackTrace();
+      logger.error(e);
       defaultInternalServerErrorProcessor.execute(request, out);
     }
   }

@@ -30,7 +30,6 @@ public class RequestHandler implements Runnable {
       }
       String rawRequest = new String(buffer, 0, n);
       HttpRequest request = new HttpRequest(rawRequest);
-      request.printInfo(true);
       dispatcher.execute(request, out);
     } catch (IOException e) {
       throw new RuntimeException(e);
