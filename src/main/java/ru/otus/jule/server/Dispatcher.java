@@ -1,5 +1,9 @@
 package ru.otus.jule.server;
 
+import com.google.gson.Gson;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import ru.otus.jule.server.app.ItemsRepository;
 import ru.otus.jule.server.processors.*;
 
 import java.io.IOException;
@@ -9,38 +13,48 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Dispatcher {
+  private static final Logger logger = LogManager.getLogger(Dispatcher.class.getName());
   private Map<String, RequestProcessor> processors;
   private RequestProcessor defaultNotFoundRequestProcessor;
-  private RequestProcessor defaultInternalServerErrorRequestProcessor;
+  private RequestProcessor defaultInternalServerErrorProcessor;
+
+  private ItemsRepository itemsRepository;
 
   public Dispatcher() {
+    this.itemsRepository = new ItemsRepository();
+
     this.processors = new HashMap<>();
-    this.processors.put("/", new HelloWorldRequestProcessor());
-    this.processors.put("/another", new AnotherHelloWorldRequestProcessor());
-    this.processors.put("/calculator", new CalculatorRequestProcessor());
+    this.processors.put("GET /", new HelloWorldRequestProcessor());
+    this.processors.put("GET /another", new AnotherHelloWorldRequestProcessor());
+    this.processors.put("GET /calculator", new CalculatorRequestProcessor());
+    this.processors.put("GET /items", new GetAllItemsProcessor(itemsRepository));
+    this.processors.put("POST /items", new CreateNewItemProcessor(itemsRepository));
+    this.processors.put("DELETE /items", new DeleteItemProcessor(itemsRepository));
+
     this.defaultNotFoundRequestProcessor = new DefaultNotFoundRequestProcessor();
-    this.defaultInternalServerErrorRequestProcessor = new DefaultInternalServerErrorRequestProcessor();
+    this.defaultInternalServerErrorProcessor = new DefaultInternalServerErrorRequestProcessor();
   }
 
   public void execute(HttpRequest request, OutputStream out) throws IOException {
     try {
-      if (!processors.containsKey(request.getUri())) {
+      if (!processors.containsKey(request.getRoutingKey())) {
         defaultNotFoundRequestProcessor.execute(request, out);
         return;
       }
-
-      processors.get(request.getUri()).execute(request, out);
+      processors.get(request.getRoutingKey()).execute(request, out);
     } catch (BadRequestException e) {
-      e.printStackTrace();
+      logger.error(e.getMessage(), e);
+      DefaultErrorDto defaultErrorDto = new DefaultErrorDto("CLIENT_DEFAULT_ERROR", e.getMessage());
+      String jsonError = new Gson().toJson(defaultErrorDto);
       String response = "" +
               "HTTP/1.1 400 Bad Request\r\n" +
-              "Content-type: text/html\r\n" +
+              "Content-Type: application/json\r\n" +
               "\r\n" +
-              "<html><body><h1>" + e.getMessage() + "</h1></body></html>";
+              jsonError;
       out.write(response.getBytes(StandardCharsets.UTF_8));
     } catch (Exception e) {
-      e.printStackTrace();
-      defaultInternalServerErrorRequestProcessor.execute(request, out);
+      logger.error("Сервер попытался выполнить недопустимую операцию", e);
+      defaultInternalServerErrorProcessor.execute(request, out);
     }
   }
 }
